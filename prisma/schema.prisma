@@ -1,0 +1,333 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  name      RoleName @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+
+  @@map("roles")
+}
+
+model User {
+  id                String     @id @default(uuid())
+  name              String
+  email             String     @unique
+  passwordHash      String
+  roleId            String
+  isActive          Boolean    @default(true)
+  lastLoginAt       DateTime?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  auditLogs         AuditLog[]
+  blogPosts         BlogPost[]
+  assignedEnquiries Enquiry[]
+  role              Role       @relation(fields: [roleId], references: [id])
+
+  @@index([email])
+  @@index([roleId])
+  @@index([isActive])
+  @@map("users")
+}
+
+model Project {
+  id               String              @id @default(uuid())
+  title            String
+  slug             String              @unique
+  shortDescription String
+  description      String
+  clientName       String?
+  industry         String?
+  challenge        String?
+  solution         String?
+  results          String?
+  projectUrl       String?
+  githubUrl        String?
+  featured         Boolean             @default(false)
+  status           ProjectStatus       @default(DRAFT)
+  sortOrder        Int                 @default(0)
+  publishedAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  caseStudy        CaseStudy?
+  projectMedia     ProjectMedia[]
+  technologies     ProjectTechnology[]
+
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@index([publishedAt])
+  @@index([slug])
+  @@map("projects")
+}
+
+model ProjectMedia {
+  id        String   @id @default(uuid())
+  projectId String
+  mediaId   String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  media     Media    @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, mediaId])
+  @@index([projectId])
+  @@index([mediaId])
+  @@map("project_media")
+}
+
+model Technology {
+  id        String              @id @default(uuid())
+  name      String              @unique
+  slug      String              @unique
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+  projects  ProjectTechnology[]
+
+  @@map("technologies")
+}
+
+model ProjectTechnology {
+  projectId    String
+  technologyId String
+  createdAt    DateTime   @default(now())
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, technologyId])
+  @@map("project_technologies")
+}
+
+model CaseStudy {
+  id        String   @id @default(uuid())
+  projectId String   @unique
+  challenge String
+  solution  String
+  approach  String?
+  results   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("case_studies")
+}
+
+model Service {
+  id               String        @id @default(uuid())
+  title            String
+  slug             String        @unique
+  shortDescription String
+  description      String
+  icon             String?
+  featured         Boolean       @default(false)
+  status           ServiceStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  enquiries        Enquiry[]
+
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@index([slug])
+  @@map("services")
+}
+
+model BlogCategory {
+  id          String     @id @default(uuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  blogPosts   BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model Tag {
+  id        String        @id @default(uuid())
+  name      String        @unique
+  slug      String        @unique
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  blogPosts BlogPostTag[]
+
+  @@map("tags")
+}
+
+model BlogPost {
+  id           String         @id @default(uuid())
+  title        String
+  slug         String         @unique
+  excerpt      String
+  content      String
+  coverMediaId String?
+  authorId     String
+  categoryId   String?
+  status       BlogPostStatus @default(DRAFT)
+  publishedAt  DateTime?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  tags         BlogPostTag[]
+  author       User           @relation(fields: [authorId], references: [id])
+  category     BlogCategory?  @relation(fields: [categoryId], references: [id])
+  coverMedia   Media?         @relation(fields: [coverMediaId], references: [id])
+
+  @@index([slug])
+  @@index([status])
+  @@index([publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@map("blog_posts")
+}
+
+model BlogPostTag {
+  blogPostId String
+  tagId      String
+  blogPost   BlogPost @relation(fields: [blogPostId], references: [id], onDelete: Cascade)
+  tag        Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([blogPostId, tagId])
+  @@map("blog_post_tags")
+}
+
+model Testimonial {
+  id          String            @id @default(uuid())
+  clientName  String
+  company     String?
+  designation String?
+  content     String
+  imageId     String?
+  featured    Boolean           @default(false)
+  status      TestimonialStatus @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  image       Media?            @relation(fields: [imageId], references: [id])
+
+  @@index([status])
+  @@index([featured])
+  @@map("testimonials")
+}
+
+model Enquiry {
+  id           String        @id @default(uuid())
+  name         String
+  company      String?
+  email        String
+  phone        String?
+  serviceId    String?
+  message      String
+  budget       Decimal?      @db.Decimal(10, 2)
+  source       String?
+  utmSource    String?
+  utmMedium    String?
+  utmCampaign  String?
+  landingPage  String?
+  status       EnquiryStatus @default(NEW)
+  assignedToId String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  assignedTo   User?         @relation(fields: [assignedToId], references: [id])
+  service      Service?      @relation(fields: [serviceId], references: [id])
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([assignedToId])
+  @@index([serviceId])
+  @@map("enquiries")
+}
+
+model Media {
+  id               String         @id @default(uuid())
+  storageKey       String         @unique
+  url              String
+  filename         String
+  mimeType         String
+  size             Int
+  width            Int?
+  height           Int?
+  altText          String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  blogPostCover    BlogPost[]
+  projectMedia     ProjectMedia[]
+  testimonialImage Testimonial[]
+
+  @@index([storageKey])
+  @@map("media")
+}
+
+model SiteSetting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([key])
+  @@map("site_settings")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  resource   String
+  resourceId String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+  actor      User?    @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([resource, resourceId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ServiceStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum BlogPostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  CONVERTED
+  CLOSED
+  SPAM
+}
+
+enum TestimonialStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum RoleName {
+  SUPER_ADMIN
+  ADMIN
+}

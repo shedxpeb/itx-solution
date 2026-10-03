@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/ui" },
+    { "path": "./packages/config" },
+    { "path": "./packages/contracts" },
+    { "path": "./packages/validation" },
+    { "path": "./packages/types" },
+    { "path": "./apps/web" },
+    { "path": "./apps/admin" },
+    { "path": "./apps/api" }
+  ]
+}

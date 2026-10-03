@@ -1,0 +1,41 @@
+{
+  "name": "itx-solution",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean",
+    "prisma:generate": "prisma generate",
+    "prisma:format": "prisma format",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio",
+    "prisma:validate": "prisma validate",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@prisma/client": "5.22.0",
+    "@types/node": "^20.14.0",
+    "@typescript-eslint/parser": "^8.71.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "prisma": "5.22.0",
+    "tsx": "^4.23.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "dependencies": {
+    "@itx/web": "workspace:^",
+    "lucide-react": "^1.49.0"
+  }
+}

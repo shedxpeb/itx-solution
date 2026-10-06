@@ -8,23 +8,70 @@ import { navigation, ctaConfig, siteConfig } from '@itx/config';
 import { gsap } from '@/lib/motion/gsap';
 import { shouldAnimate } from '@/lib/motion/reduced-motion';
 import { motionConfig } from '@/lib/motion/config';
+import { ServicesMegaMenu } from '@/components/navigation/services-mega-menu';
+
+const serviceCategories = [
+  {
+    title: 'DIGITAL EXPERIENCE',
+    items: [
+      { label: 'Websites', href: '/services/websites' },
+      { label: 'Web Applications', href: '/services/web-applications' },
+      { label: 'E-Commerce', href: '/services/e-commerce' },
+    ],
+  },
+  {
+    title: 'BUSINESS SYSTEMS',
+    items: [
+      { label: 'CRM & ERP', href: '/services/crm-erp' },
+      { label: 'Custom Software', href: '/services/custom-software' },
+      { label: 'Dashboards & Tools', href: '/services/dashboards' },
+    ],
+  },
+  {
+    title: 'MOBILE & AUTOMATION',
+    items: [
+      { label: 'Mobile Applications', href: '/services/mobile-applications' },
+      { label: 'Automation & Integrations', href: '/services/automation' },
+    ],
+  },
+  {
+    title: 'DESIGN & INTELLIGENCE',
+    items: [
+      { label: 'AI & Intelligent Systems', href: '/services/ai-systems' },
+      { label: 'UI/UX & Product Design', href: '/services/ui-ux-design' },
+      { label: 'Support & Improvement', href: '/services/support' },
+    ],
+  },
+];
 
 type NavbarTheme = 'light' | 'dark';
 
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [navbarTheme, setNavbarTheme] = useState<NavbarTheme>('light');
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileItemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const servicesRef = useRef<HTMLAnchorElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
+  const closeMegaMenu = () => setMegaMenuOpen(false);
 
   const isActive = (href: string) => {
     if (href === '/') return pathname === '/';
     return pathname.startsWith(href);
+  };
+
+  // Services mega menu handlers
+  const handleServicesEnter = () => {
+    setMegaMenuOpen(true);
+  };
+
+  const handleServicesLeave = () => {
+    setMegaMenuOpen(false);
   };
 
   // Detect section theme using IntersectionObserver
@@ -104,9 +151,10 @@ export function SiteHeader() {
     return () => window.removeEventListener('keydown', handleEscape);
   }, [mobileMenuOpen]);
 
-  // Close menu on route change
+  // Close menus on route change
   useEffect(() => {
     closeMobileMenu();
+    closeMegaMenu();
   }, [pathname]);
 
   // Initial entrance
@@ -253,38 +301,48 @@ export function SiteHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden lg:flex items-center justify-center space-x-10">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.href}
-              href={item.href}
-              variant={item.disabled ? 'muted' : isActive(item.href) ? 'primary' : 'default'}
-              className={`relative text-sm font-medium transition-colors ${
-                item.disabled ? 'cursor-not-allowed opacity-50' : ''
-              }`}
-              style={{
-                color: isActive(item.href) ? activeColor : linkColor,
-              }}
-              onMouseEnter={(e) => {
-                if (!item.disabled && !isActive(item.href)) {
-                  e.currentTarget.style.color = linkHoverColor;
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!item.disabled && !isActive(item.href)) {
-                  e.currentTarget.style.color = linkColor;
-                }
-              }}
-              data-cursor="link"
-            >
-              {item.label}
-              {isActive(item.href) && !item.disabled && (
-                <span
-                  className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full transition-all duration-200"
-                  style={{ backgroundColor: activeColor }}
-                />
-              )}
-            </NavLink>
-          ))}
+          {navigation.map((item) => {
+            const isServices = item.label === 'Services';
+            return (
+              <div
+                key={item.href}
+                className="relative"
+                onMouseEnter={isServices ? handleServicesEnter : undefined}
+                onMouseLeave={isServices ? handleServicesLeave : undefined}
+              >
+                <NavLink
+                  ref={isServices ? servicesRef : undefined}
+                  href={item.href}
+                  variant={item.disabled ? 'muted' : isActive(item.href) ? 'primary' : 'default'}
+                  className={`relative text-sm font-medium transition-colors ${
+                    item.disabled ? 'cursor-not-allowed opacity-50' : ''
+                  }`}
+                  style={{
+                    color: isActive(item.href) ? activeColor : linkColor,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!item.disabled && !isActive(item.href) && !isServices) {
+                      e.currentTarget.style.color = linkHoverColor;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!item.disabled && !isActive(item.href) && !isServices) {
+                      e.currentTarget.style.color = linkColor;
+                    }
+                  }}
+                  data-cursor="link"
+                >
+                  {item.label}
+                  {isActive(item.href) && !item.disabled && (
+                    <span
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full transition-all duration-200"
+                      style={{ backgroundColor: activeColor }}
+                    />
+                  )}
+                </NavLink>
+              </div>
+            );
+          })}
         </nav>
 
         {/* Desktop CTA */}
@@ -317,6 +375,13 @@ export function SiteHeader() {
           )}
         </button>
       </div>
+
+      {/* Services Mega Menu */}
+      <ServicesMegaMenu
+        isOpen={megaMenuOpen}
+        onClose={closeMegaMenu}
+        navbarTheme={navbarTheme}
+      />
 
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
@@ -359,24 +424,69 @@ export function SiteHeader() {
 
           {/* Menu content */}
           <nav className="px-6 py-12 space-y-2 overflow-y-auto max-h-[calc(100dvh-64px)]">
-            {navigation.map((item, index) => (
-              <div
-                key={item.href}
-                ref={(el) => { mobileItemRefs.current[index] = el; }}
-              >
-                <NavLink
-                  href={item.href}
-                  variant={item.disabled ? 'muted' : isActive(item.href) ? 'primary' : 'default'}
-                  className={`block py-4 text-3xl font-bold transition-colors ${
-                    item.disabled ? 'cursor-not-allowed opacity-50' : ''
-                  }`}
-                  style={{ color: mobileMenuText }}
-                  onClick={closeMobileMenu}
+            {navigation.map((item, index) => {
+              const isServices = item.label === 'Services';
+              return (
+                <div
+                  key={item.href}
+                  ref={(el) => { mobileItemRefs.current[index] = el; }}
                 >
-                  {item.label}
-                </NavLink>
-              </div>
-            ))}
+                  {isServices ? (
+                    <div>
+                      <button
+                        className="block w-full text-left py-4 text-3xl font-bold transition-colors"
+                        style={{ color: mobileMenuText }}
+                        onClick={() => {
+                          // Toggle services accordion
+                          const servicesSubmenu = document.getElementById('mobile-services-submenu');
+                          if (servicesSubmenu) {
+                            const isHidden = servicesSubmenu.style.display === 'none';
+                            servicesSubmenu.style.display = isHidden ? 'block' : 'none';
+                          }
+                        }}
+                      >
+                        {item.label}
+                      </button>
+                      <div
+                        id="mobile-services-submenu"
+                        className="hidden pl-6 space-y-2 mt-2"
+                      >
+                        {serviceCategories.map((category) => (
+                          <div key={category.title} className="mb-4">
+                            <h4 className="text-xs font-bold tracking-[0.2em] text-[#5F7080] uppercase mb-2">
+                              {category.title}
+                            </h4>
+                            {category.items.map((subItem) => (
+                              <NavLink
+                                key={subItem.href}
+                                href={subItem.href}
+                                className="block py-2 text-lg font-medium transition-colors"
+                                style={{ color: mobileMenuText }}
+                                onClick={closeMobileMenu}
+                              >
+                                {subItem.label}
+                              </NavLink>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <NavLink
+                      href={item.href}
+                      variant={item.disabled ? 'muted' : isActive(item.href) ? 'primary' : 'default'}
+                      className={`block py-4 text-3xl font-bold transition-colors ${
+                        item.disabled ? 'cursor-not-allowed opacity-50' : ''
+                      }`}
+                      style={{ color: mobileMenuText }}
+                      onClick={closeMobileMenu}
+                    >
+                      {item.label}
+                    </NavLink>
+                  )}
+                </div>
+              );
+            })}
             
             {/* CTA Button */}
             {!ctaConfig.header.disabled && (

@@ -1,5 +1,5 @@
 import { Heading4, BodyMedium, NavLink, Caption, Container } from '@itx/ui';
-import { footerNavigation, siteConfig } from '@itx/config';
+import { siteConfig } from '@itx/config';
 
 export function SiteFooter() {
   return (
@@ -17,19 +17,17 @@ export function SiteFooter() {
             </BodyMedium>
           </div>
 
-          {/* Company */}
+          {/* Navigation */}
           <div>
             <Caption className="tracking-[0.25em] text-[#1687E8] font-semibold mb-6 text-xs uppercase">
-              COMPANY
+              NAVIGATION
             </Caption>
             <ul className="space-y-4">
-              {footerNavigation.company.map((item) => (
-                <li key={item.href}>
-                  <NavLink href={item.href} className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+              <li><NavLink href="/" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Home</NavLink></li>
+              <li><NavLink href="/about" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">About</NavLink></li>
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Services</NavLink></li>
+              <li><NavLink href="/projects" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Projects</NavLink></li>
+              <li><NavLink href="/case-studies" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Case Studies</NavLink></li>
             </ul>
           </div>
 
@@ -39,29 +37,24 @@ export function SiteFooter() {
               SERVICES
             </Caption>
             <ul className="space-y-4">
-              {footerNavigation.services.map((item, index) => (
-                <li key={`${item.href}-${index}`}>
-                  <NavLink href={item.href} className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Web Development</NavLink></li>
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">CRM & ERP</NavLink></li>
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Custom Software</NavLink></li>
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Mobile Applications</NavLink></li>
+              <li><NavLink href="/services" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Automation</NavLink></li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Technology & Industries */}
           <div>
             <Caption className="tracking-[0.25em] text-[#1687E8] font-semibold mb-6 text-xs uppercase">
-              RESOURCES
+              MORE
             </Caption>
             <ul className="space-y-4">
-              {footerNavigation.resources.map((item) => (
-                <li key={item.href}>
-                  <NavLink href={item.href} className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
+              <li><NavLink href="/technology" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Technology</NavLink></li>
+              <li><NavLink href="/industries" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Industries</NavLink></li>
+              <li><NavLink href="/blog" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Blog</NavLink></li>
+              <li><NavLink href="/contact" className="text-white/70 hover:text-white hover:translate-x-1 transition-all text-sm inline-block">Contact</NavLink></li>
             </ul>
           </div>
         </div>
@@ -76,20 +69,24 @@ export function SiteFooter() {
               <BodyMedium className="text-white/70 text-sm leading-[1.6]">
                 427, Vishala Supreme,<br />
                 SP Ring Road, Nikol,<br />
-                Ahmedabad
+                Ahmedabad, Gujarat, India
               </BodyMedium>
             </div>
             <div>
               <Caption className="tracking-[0.25em] text-[#1687E8] font-semibold mb-4 text-xs uppercase">
                 CONTACT
               </Caption>
-              <BodyMedium className="text-white text-sm">
+              <BodyMedium className="text-white text-sm leading-[1.6]">
                 <NavLink href="tel:9316463947" className="!text-white hover:text-[#45B8FF] transition-colors inline">
-                  9316463947
+                  Phone: 9316463947
                 </NavLink>
-                <span className="mx-2"></span>
+                <br />
+                <NavLink href="https://wa.me/9316463947" className="!text-white hover:text-[#45B8FF] transition-colors inline">
+                  WhatsApp: 9316463947
+                </NavLink>
+                <br />
                 <NavLink href="mailto:itxsolution@gmail.com" className="!text-white hover:text-[#45B8FF] transition-colors inline">
-                  itxsolution@gmail.com
+                  Email: itxsolution@gmail.com
                 </NavLink>
               </BodyMedium>
             </div>
@@ -100,23 +97,6 @@ export function SiteFooter() {
               <BodyMedium className="text-white/70 text-sm">
                 LinkedIn • Twitter
               </BodyMedium>
-            </div>
-          </div>
-        </div>
-
-        {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-white/10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <BodyMedium className="text-white/50 text-sm">
-              © {new Date().getFullYear()} ITX Solution. All rights reserved.
-            </BodyMedium>
-            <div className="flex gap-6">
-              <NavLink href="/privacy" className="text-white/50 hover:text-white transition-colors text-sm">
-                Privacy
-              </NavLink>
-              <NavLink href="/terms" className="text-white/50 hover:text-white transition-colors text-sm">
-                Terms
-              </NavLink>
             </div>
           </div>
         </div>

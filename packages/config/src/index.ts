@@ -28,6 +28,8 @@ export const navigation: NavigationItem[] = [
   { label: 'Services', href: '/services' },
   { label: 'Projects', href: '/projects' },
   { label: 'Case Studies', href: '/case-studies' },
+  { label: 'Technology', href: '/technology' },
+  { label: 'Industries', href: '/industries' },
   { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '/contact' },
 ];
@@ -43,7 +45,7 @@ export const footerNavigation = {
     { label: 'Web Development', href: '/services' },
     { label: 'CRM & ERP', href: '/services' },
     { label: 'Custom Software', href: '/services' },
-    { label: 'Mobile Applications', href: '/services' },
+    { label: '                  Mobile Applications', href: '/services' },
     { label: 'Automation', href: '/services' },
     { label: 'AI & Intelligent Systems', href: '/services' },
   ],

@@ -1,87 +1,222 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Container, Heading1, BodyLarge, Caption, NavLink } from '@itx/ui';
+import { gsap, ScrollTrigger } from '@/lib/motion/gsap';
+import { shouldAnimate } from '@/lib/motion/reduced-motion';
+import { motionConfig } from '@/lib/motion/config';
 
-export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar-theme'?: string }) {
+export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar-theme'?: string } = {}) {
   const heroRef = useRef<HTMLElement>(null);
+  const eyebrowRef = useRef<HTMLDivElement>(null);
+  const headlineRef = useRef<HTMLDivElement>(null);
+  const paragraphRef = useRef<HTMLDivElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const visualRef = useRef<HTMLDivElement>(null);
+  const visualElementsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  // Mouse parallax
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    if (!heroRef.current || !shouldAnimate()) return;
+
+    const ctx = gsap.context(() => {
+      // Entrance animations
+      const tl = gsap.timeline();
+
+      // Eyebrow reveal
+      tl.from(eyebrowRef.current, {
+        opacity: 0,
+        y: 20,
+        duration: motionConfig.duration.medium,
+        ease: motionConfig.easing.standard,
+      });
+
+      // Headline line-by-line reveal
+      if (headlineRef.current) {
+        const lines = headlineRef.current.querySelectorAll('span');
+        tl.from(
+          lines,
+          {
+            opacity: 0,
+            y: 40,
+            duration: motionConfig.duration.medium,
+            ease: motionConfig.easing.emphasized,
+            stagger: motionConfig.stagger.normal,
+          },
+          '-=0.2'
+        );
+      }
+
+      // Paragraph reveal
+      tl.from(
+        paragraphRef.current,
+        {
+          opacity: 0,
+          y: 20,
+          duration: motionConfig.duration.medium,
+          ease: motionConfig.easing.standard,
+        },
+        '-=0.3'
+      );
+
+      // Buttons reveal
+      tl.from(
+        buttonsRef.current?.children || [],
+        {
+          opacity: 0,
+          y: 20,
+          duration: motionConfig.duration.short,
+          ease: motionConfig.easing.standard,
+          stagger: motionConfig.stagger.fast,
+        },
+        '-=0.2'
+      );
+
+      // Visual elements assemble
+      const visualElements = visualElementsRef.current.filter(Boolean);
+      tl.from(
+        visualElements,
+        {
+          opacity: 0,
+          scale: 0.9,
+          y: 30,
+          duration: motionConfig.duration.medium,
+          ease: motionConfig.easing.bouncy,
+          stagger: motionConfig.stagger.normal,
+        },
+        '-=0.4'
+      );
+    }, heroRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // Mouse parallax effect
+  useEffect(() => {
+    if (!visualRef.current || typeof window === 'undefined') return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = visualRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const x = (e.clientX - centerX) / rect.width;
+      const y = (e.clientY - centerY) / rect.height;
+
+      setMousePosition({ x, y });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Apply parallax to visual elements
+  useEffect(() => {
+    if (!shouldAnimate()) return;
+
+    const elements = visualElementsRef.current.filter(Boolean);
+    elements.forEach((el, index) => {
+      if (!el) return;
+
+      const depth = (index + 1) * 0.1;
+      const x = mousePosition.x * 20 * depth;
+      const y = mousePosition.y * 20 * depth;
+
+      gsap.to(el, {
+        x,
+        y,
+        duration: 0.5,
+        ease: 'power2.out',
+      });
+    });
+  }, [mousePosition]);
 
   return (
     <section
       ref={heroRef}
       data-navbar-theme={navbarTheme}
-      className="relative min-h-[auto] lg:min-h-screen bg-[#F5F8FC] overflow-hidden w-full"
+      className="relative min-h-[auto] lg:min-h-screen bg-[#071017] overflow-hidden w-full"
     >
       {/* Subtle grid background */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage: `
-            linear-gradient(rgba(22, 135, 232, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(22, 135, 232, 0.02) 1px, transparent 1px)
+            linear-gradient(rgba(22, 135, 232, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(22, 135, 232, 0.03) 1px, transparent 1px)
           `,
           backgroundSize: '80px 80px',
         }}
       />
 
       {/* Ambient glow - Desktop only */}
-      <div className="hidden lg:block absolute top-0 right-0 w-[700px] h-[700px] bg-[#1687E8] rounded-full blur-[250px] opacity-[0.10] pointer-events-none" />
-      <div className="hidden lg:block absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#45B8FF] rounded-full blur-[220px] opacity-[0.08] pointer-events-none" />
-      
+      <div className="hidden lg:block absolute top-0 right-0 w-[700px] h-[700px] bg-[#1687E8] rounded-full blur-[250px] opacity-[0.15] pointer-events-none" />
+      <div className="hidden lg:block absolute bottom-0 left-0 w-[600px] h-[600px] bg-[#45B8FF] rounded-full blur-[220px] opacity-[0.12] pointer-events-none" />
+
       {/* Mobile ambient glow - simpler */}
-      <div className="lg:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#1687E8] rounded-full blur-[120px] opacity-[0.08] pointer-events-none" />
+      <div className="lg:hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#1687E8] rounded-full blur-[120px] opacity-[0.10] pointer-events-none" />
 
       {/* Radial glow behind product visual - Desktop only */}
-      <div className="hidden lg:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-[#1687E8]/5 to-[#45B8FF]/5 rounded-full blur-[300px] opacity-[0.4] pointer-events-none" />
+      <div className="hidden lg:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-[#1687E8]/8 to-[#45B8FF]/8 rounded-full blur-[300px] opacity-[0.5] pointer-events-none" />
 
       <Container className="relative z-10 w-full min-h-screen py-24 lg:py-32 px-6 md:px-8">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center w-full max-w-7xl mx-auto">
           {/* LEFT - Content */}
           <div className="w-full lg:pr-8 order-1 lg:order-1">
-            <Caption className="tracking-[0.35em] text-[#1687E8] mb-6 md:mb-10 text-xs uppercase w-full max-w-full font-semibold">
-              ITX SOLUTION • TECHNOLOGY PARTNER
-            </Caption>
+            <div ref={eyebrowRef}>
+              <Caption className="tracking-[0.35em] text-[#45B8FF] mb-6 md:mb-10 text-xs uppercase w-full max-w-full font-semibold">
+                ITX SOLUTION • TECHNOLOGY PARTNER
+              </Caption>
+            </div>
 
-            <div className="mb-8 md:mb-10">
-              <Heading1 className="text-[clamp(42px,11vw,54px)] font-bold tracking-tight leading-[0.95] text-[#091118] mb-6 md:mb-8 max-w-2xl">
+            <div ref={headlineRef} className="mb-8 md:mb-10">
+              <Heading1 className="text-[clamp(56px,6vw,96px)] font-bold tracking-tight leading-[0.95] text-[#FFFFFF] mb-6 md:mb-8 max-w-2xl">
                 <span className="block">BUILD DIGITAL</span>
-                <span className="block text-[#1687E8]">SYSTEMS THAT</span>
-                <span className="block">MOVE BUSINESS.</span>
+                <span className="block text-[#1687E8]">SYSTEMS</span>
+                <span className="block">THAT</span>
+                <span className="block text-[#45B8FF]">MOVE</span>
+                <span className="block">BUSINESS.</span>
               </Heading1>
             </div>
 
-            <BodyLarge className="text-[#5F7080] text-base md:text-lg leading-[1.55] max-w-[330px] md:max-w-xl mb-8 md:mb-12">
-              We design and build websites, custom software, CRM, ERP, mobile applications, automation and AI-powered systems around the way your business actually works.
-            </BodyLarge>
+            <div ref={paragraphRef}>
+              <BodyLarge className="text-[#A7DFFF] text-base md:text-lg leading-[1.55] max-w-[330px] md:max-w-xl mb-8 md:mb-12">
+                We design and build websites, custom software, CRM, ERP, mobile applications, automation and AI-powered systems around the way your business actually works.
+              </BodyLarge>
+            </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
+            <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
               <NavLink
                 href="/contact"
                 className="inline-flex items-center justify-center gap-3 rounded-xl font-bold transition-all bg-[#1687E8] text-white hover:bg-[#0F5CB8] hover:shadow-2xl hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 px-8 md:px-10 py-3 md:py-4 text-base md:text-lg w-full sm:w-auto min-h-[46px]"
               >
-                Let&apos;s Talk
+                LET'S TALK
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </NavLink>
               <NavLink
                 href="/services"
-                className="inline-flex items-center justify-center gap-3 rounded-xl font-bold transition-all border-2 border-[#DCE6EE] bg-white hover:border-[#1687E8]/40 hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 px-8 md:px-10 py-3 md:py-4 text-base md:text-lg w-full sm:w-auto text-[#091118] min-h-[46px]"
+                className="inline-flex items-center justify-center gap-3 rounded-xl font-bold transition-all border-2 border-[#2E9BF3] bg-transparent hover:bg-[#2E9BF3]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 px-8 md:px-10 py-3 md:py-4 text-base md:text-lg w-full sm:w-auto text-[#FFFFFF] min-h-[46px]"
               >
-                Explore Solutions
+                EXPLORE SOLUTIONS
               </NavLink>
             </div>
           </div>
 
           {/* RIGHT - Digital Ecosystem Visual */}
-          <div className="relative w-full h-[300px] lg:h-[680px] lg:pl-8 order-2 lg:order-2">
-            
+          <div ref={visualRef} className="relative w-full h-[300px] lg:h-[680px] lg:pl-8 order-2 lg:order-2">
+
             {/* Desktop Visual Stage - Clean zone-based composition */}
             <div className="hidden lg:block relative w-full h-full max-w-[620px] ml-auto">
-              
+
               {/* Visual Stage with fixed dimensions */}
               <div className="relative w-full h-[500px] p-[24px] box-border overflow-hidden">
-                
+
                 {/* Connection lines - Layer 1 (BEHIND all cards) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none z-1">
                   <defs>
@@ -101,7 +236,10 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
                 </svg>
 
                 {/* Browser Anchor - TOP CENTER ZONE */}
-                <div className="absolute left-1/2 top-[8%] -translate-x-1/2 z-10">
+                <div
+                  ref={(el) => { visualElementsRef.current[0] = el; }}
+                  className="absolute left-1/2 top-[8%] -translate-x-1/2 z-10"
+                >
                   <div className="w-[480px] h-[290px] bg-white rounded-xl shadow-2xl border border-[#DCE6EE] overflow-hidden">
                     <div className="h-10 bg-[#091118] flex items-center px-4 gap-2">
                       <div className="w-3 h-3 rounded-full bg-[#1687E8]" />
@@ -151,7 +289,10 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
                 </div>
 
                 {/* CRM Anchor - LEFT MIDDLE ZONE */}
-                <div className="absolute left-[2%] top-[36%] z-15">
+                <div
+                  ref={(el) => { visualElementsRef.current[1] = el; }}
+                  className="absolute left-[2%] top-[36%] z-15"
+                >
                   <div className="w-[200px] h-[145px] bg-white rounded-xl shadow-xl border border-[#DCE6EE] overflow-hidden">
                     <div className="h-8 bg-[#071017] flex items-center px-4">
                       <div className="h-2 w-2 rounded-full bg-[#1687E8]" />
@@ -175,7 +316,10 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
                 </div>
 
                 {/* Mobile Anchor - RIGHT MIDDLE ZONE */}
-                <div className="absolute right-[2%] top-[30%] z-15">
+                <div
+                  ref={(el) => { visualElementsRef.current[2] = el; }}
+                  className="absolute right-[2%] top-[30%] z-15"
+                >
                   <div className="w-[145px] h-[225px] bg-[#091118] rounded-xl shadow-xl overflow-hidden">
                     <div className="h-8 bg-[#101C26] flex items-center justify-center">
                       <div className="w-10 h-6 bg-[#1687E8] rounded" />
@@ -190,7 +334,10 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
                 </div>
 
                 {/* Automation Anchor - LOWER LEFT ZONE */}
-                <div className="absolute left-[7%] bottom-[6%] z-12">
+                <div
+                  ref={(el) => { visualElementsRef.current[3] = el; }}
+                  className="absolute left-[7%] bottom-[6%] z-12"
+                >
                   <div className="w-[210px] h-[145px] bg-white rounded-xl shadow-xl border border-[#DCE6EE] overflow-hidden">
                     <div className="h-7 bg-[#1687E8] flex items-center px-4">
                       <span className="text-xs text-white font-medium">Automation</span>
@@ -213,7 +360,10 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
                 </div>
 
                 {/* Database Anchor - LOWER RIGHT ZONE */}
-                <div className="absolute right-[7%] bottom-[8%] z-12">
+                <div
+                  ref={(el) => { visualElementsRef.current[4] = el; }}
+                  className="absolute right-[7%] bottom-[8%] z-12"
+                >
                   <div className="w-[180px] h-[130px] bg-white rounded-xl shadow-xl border border-[#DCE6EE] overflow-hidden">
                     <div className="h-6 bg-[#5F7080] flex items-center px-4">
                       <span className="text-xs text-white">Database</span>
@@ -235,7 +385,7 @@ export function HeroSection({ 'data-navbar-theme': navbarTheme }: { 'data-navbar
             <div className="lg:hidden relative w-full h-[260px] mx-auto">
               {/* Visual stage container */}
               <div className="relative w-full h-full">
-                
+
                 {/* Main browser - Centered */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[280px] h-[180px] bg-white rounded-xl shadow-lg border border-[#DCE6EE] overflow-hidden">
                   <div className="h-8 bg-[#091118] flex items-center px-3 gap-2">
